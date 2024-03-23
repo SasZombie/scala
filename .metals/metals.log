@@ -5072,3 +5072,17 @@ seccondLab.worksheet.sc:82 (mdoc generated code)
 2024.03.23 20:25:22 INFO  time: evaluated worksheet 'seccondLab.worksheet.sc' in 0.56s[0m
 Mar 23, 2024 8:25:26 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
 INFO: Unsupported notification method: $/setTrace
+2024.03.23 20:25:42 INFO  compiling scala_bd2c96d2de (1 scala source)[0m
+2024.03.23 20:25:42 INFO  time: compiled scala_bd2c96d2de in 0.69s[0m
+[31merror[39m: seccondLab.worksheet.sc:86:1: 
+Found:    Unit
+Required: Double
+{
+^
+[33mwarning[39m: 
+seccondLab.worksheet.sc:82 (mdoc generated code) 
+ Line is indented too far to the left, or a `}` is missing
+            if(foldMap((x, y) => (x+y), (x) => (loop(x)))(start, stop) > 0) true
+
+
+2024.03.23 20:25:43 INFO  time: evaluated worksheet 'seccondLab.worksheet.sc' in 0.66s[0m
