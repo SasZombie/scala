@@ -158,14 +158,7 @@ def exists(cond: Int => Boolean)(start: Int, stop: Int)(s: Set): Boolean =
 
 def setOfDivByK(k: Int): Set =
 {
-    def isDiv(x: Int): Boolean = 
-    {
-        if(x%k == 0) true
-        else false
-    }
-
-    val l = fromBounds(-100, 100)// If I try using Int min and Int max I get stack overflow
-    partition(isDiv)(l)._1
+    (x: Int) => x % k == 0
 }
 
 def moreDivs(k: Int)(start: Int, stop:Int)(s1: Set, s2: Set): Boolean = 
