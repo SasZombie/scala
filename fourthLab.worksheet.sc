@@ -36,9 +36,15 @@ def take(n: Int)(l: IList): IList =
         case Cons(x, xs) => Cons(x, take(n - 1)(xs)) 
   
 def drop(n: Int)(l: IList): IList = 
-    if(n < 0) Void
+    if(n < 1) l
     else l match
         case Cons(_, xs) => drop(n-1)(xs) 
+
+val l = Cons(1, Cons(2, Cons(3, Void)))
+drop(0)(l)
+drop(1)(l)
+drop(2)(l)
+drop(3)(l)
 
 
 def append(l1: IList, l2: IList): IList = 
