@@ -78,6 +78,14 @@ def isSorted(l: IList): Boolean = {
         case Cons(_, xs) => isSorted(xs) 
 }
 
+def isSortedGen(op: (Int, Int) => Boolean)(l: IList): Boolean = {
+    l match 
+        case Void => true  
+        case Cons(_, Void) => true 
+        case Cons(x, Cons(y, _)) if op(x, y) == false => false 
+        case Cons(_, xs) => isSorted(xs) 
+}
+
 def merge(l1: IList, l2: IList): IList = 
     (l1, l2) match 
         case (Void, _) => l2 
@@ -87,25 +95,13 @@ def merge(l1: IList, l2: IList): IList =
             else Cons(y, merge(l1, ys)) 
 
 
+
 def mergeSort(l: IList): IList = {
-  def split(lst: IList): (IList, IList) = 
-    def splitHelper(lst: IList, acc: IList, count: Int): (IList, IList) = lst match {
-      case Void => (acc, Void)
-      case Cons(x, xs) if count == 0 => (acc, lst)
-      case Cons(x, xs) => splitHelper(xs, Cons(x, acc), count - 1)
-    }
-    splitHelper(lst, Void, length(lst) / 2)
-  
-
-  def length(lst: IList): Int = lst match {
-    case Void => 0
-    case Cons(_, xs) => 1 + length(xs)
-  }
-
-  l match {
-    case Void | Cons(_, Void) => l 
-    case _ =>
-      val (left, right) = split(l)
-      merge(mergeSort(left), mergeSort(right)) 
+  val len = size(l) / 2
+  if (len == 0) l
+  else {
+    val left = take(len)(l)
+    val right = drop(len)(l)
+    merge(mergeSort(left), mergeSort(right))
   }
 }
