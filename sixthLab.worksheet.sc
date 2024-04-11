@@ -114,6 +114,18 @@ def extractDuplicates(l: List[Email]): List[List[Email]] =
 
 
 //Why would We do this???
-def deleteDuplicates(l: List[Email]): List[Email] = 
-    val toDelete = extractDuplicates(l)
-    l.filterNot(toDelete.toList.contains)
+// def deleteDuplicates(l: List[Email]): List[Email] = 
+//     val toDelete = extractDuplicates(l)
+//     l.filterNot(toDelete.toList.contains)
+
+//Why??
+def deleteDuplicates(emails: List[Email]): List[List[Email]] = 
+
+    val groupedByEmail = emails.groupBy { email =>
+        val atIndex = email.indexOf('@')
+        if (atIndex != -1) email.take(atIndex).mkString 
+        else email.mkString
+    }
+
+    groupedByEmail.values.filter(_.size > 1).toList
+
