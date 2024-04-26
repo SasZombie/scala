@@ -77,7 +77,7 @@ case class Node(word: Token, left: WTree, right: WTree) extends WTree {
     else Node(word, left.ins(w), right)
 
   override def contains(s: String): Boolean =
-    if (word._1 == s) true else (left.contains(s) || right.contains(s))
+    if (word.word == s) true else (left.contains(s) || right.contains(s))
 
   override def size: Int = 1 + this.left.size + this.right.size
 
@@ -141,7 +141,7 @@ def split(text: List[Char]): List[List[Char]] = {
 }
 
 def computeTokens(words: List[String]): List[Token] = {
-  def insWord(s: String, acc: List[Token]): List[Token] =
+  def insWord(s: String, acc: List[Token]): List[Token] = {
     val matching = acc.exists(_.word == s)
 
     if (!matching)
@@ -152,13 +152,14 @@ def computeTokens(words: List[String]): List[Token] = {
           Token(word, freq + 1)
         else Token(word, freq)
       }
-
+  }
   @tailrec
   def aux(rest: List[String], acc: List[Token]): List[Token] = {
-    rest match
+    rest match {
       case Nil => acc
       case head :: next =>
         aux(next, insWord(head, acc))
+    }
   }
 
   aux(words, Nil)
@@ -175,7 +176,8 @@ def makeTree(s: String): WTree = {
   tokensToTree(finishedComputing)
 }
 
-def wordSet: WTree = ??? //Unspecified request
+def wordSet: WTree =
+  makeTree(scalaDescription)
 
 def scalaFreq: Int = {
   val tree = makeTree(scalaDescription)
@@ -194,10 +196,11 @@ def progLang: Int = {
   only.size
 }
 
-def wordCount: Int =
+def wordCount: Int = {
   val words         = split(scalaDescription.toList)
   val filteredWords = words.filter(_.length > 3)
   filteredWords.size
+}
 
 val s = 'T' :: 'h' :: 'i' :: 's' :: ' ' :: 'i' :: 's' :: ' ' :: 'a' :: ' ' :: 't' :: 'e' :: 's' :: 't' :: Nil
 split(s)
