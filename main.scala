@@ -89,7 +89,7 @@ object Matrix extends App {
   }
 
   def diag(img: Img): Img = {
-    matrix.zipWithIndex.map { case (row, i) =>
+    img.zipWithIndex.map { case (row, i) =>
       row.zipWithIndex.map { case (value, j) =>
         if (i == j) 1 else value
       }
