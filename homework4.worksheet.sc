@@ -1,3 +1,4 @@
+import scala.compiletime.ops.string
 import javax.xml.crypto.Data
 import scala.io.Source
 import scala.math.sqrt
@@ -7,32 +8,6 @@ def profileID = 2
 def dataset = Dataset("datasets/houseds.csv")
 def steps   = 10000 // the number of steps for gradient descent
 def alpha   = 0.000000000001
-
-def rootMeanSquareError(X: Matrix, Y: Matrix, parameters: Matrix): Option[Double] = 
-{
-    for{
-       (list, i) <- X.m.get.zipWithIndex
-       (elem, j) <- list.zipWithIndex
-    }yield {
-        
-    }
-}
-
-def gradientDescentStep(X: Matrix, Y: Matrix, parameters: Matrix): Matrix = ???
-
-def linearRegression(steps: Int, parameters: Matrix, features: List[String]): (Matrix, Option[Double]) = ???
-
-object Helpers {
-  def zipWith[A, B, C](op: (A, B) => C)(l1: List[A], l2: List[B]): List[C] = {
-    assert(l1.size == l2.size)
-
-    l1.zip(l2).map { case (x, y) =>
-      op(x, y)
-    }
-  }
-}
-
-Helpers.zipWith((a: Int, b: Int) => a + b)(List(1, 2, 3), List(2, 3, 4))
 
 case class Matrix(m: Option[List[List[Double]]]) {
 
@@ -79,12 +54,11 @@ case class Matrix(m: Option[List[List[Double]]]) {
 
   def normalize: Matrix = {
     val size = this.m.size * this.m.get(0).size
-    Matrix()
-    // Matrix(this.m.get.map{
-    //     (inner) => inner.map{
-    //         case elem: Double => 1/size
-    //     }.toList
-    // }.toList)
+    Matrix(this.m.get.map { (inner) =>
+      inner.map { case elem: Double =>
+        elem / size
+      }.toList
+    }.toList)
   }
 
   def map(f: Double => Double): Matrix = {
@@ -108,9 +82,11 @@ case class Matrix(m: Option[List[List[Double]]]) {
     if (this.m.get(0).size > 1)
       None
     else {
-       val inter = this.m.get.flatten
-       val sum = inter.sum
-       Some(sum * sum/inter.size)
+      // Lets pretend this is correct
+
+      val inter = this.m.get.flatten
+      val sum   = inter.sum
+      Some((sum * sum) / inter.size)
     }
   }
 
@@ -125,8 +101,8 @@ object Matrix {
   def apply(dataset: Dataset): Matrix = new Matrix(
     Option(
       dataset.data.map { (inner) =>
-        inner.map { case x =>
-          x.toDouble
+        inner.map { 
+          case x => x.toDouble
         }.toList
       }.toList
     )
@@ -192,6 +168,76 @@ object Dataset {
 
   def apply(ds: List[List[String]]): Dataset = new Dataset(ds)
 }
+
+def rootMeanSquareError(X: Matrix, Y: Matrix, parameters: Matrix): Option[Double] = {
+  val predictied = X * parameters;
+
+  val squaredError = (predictied - Y).map(x => x * x)
+
+  val meanSquare = squaredError.m.get.flatten.sum / (X.m.get(0).size * X.m.get.size)
+
+  val root = math.sqrt(meanSquare)
+
+  Some(root)
+}
+
+def gradientDescentStep(X: Matrix, Y: Matrix, parameters: Matrix): Matrix = {
+  val pred = X * parameters;
+
+  val loss         = rootMeanSquareError(X, Y, parameters)
+  var lossNoOption = 2.3
+  if (loss == None)
+    Matrix()
+  else
+    lossNoOption = loss.get
+
+  val gradMat = for (elem <- X) yield elem * lossNoOption
+  val normal  = gradMat.normalize
+
+  val combined = for ((row1, row2) <- X.m.get.zip(gradMat.m.get)) yield {
+    for ((elem1, elem2) <- row1.zip(row2)) yield {
+      elem1 - elem2 * alpha
+    }
+  }
+
+  Matrix(combined)
+}
+
+def linearRegression(steps: Int, parameters: Matrix, features: List[String]): (Matrix, Option[Double]) = 
+{
+  val dataSet = Dataset("datasets/tinyds.csv")
+  val data = dataSet.selectColumns(features)
+  val trainTest = data.split(80)
+  val train = trainTest._1
+  val test = trainTest._2
+
+  print(train)
+  val mat = Matrix(train.getRows.toString())
+  
+  val matWithOnes = mat ++ 1
+  val lastRow = mat.m.get.map(_.last)
+  val Y = Matrix(List(lastRow))
+  
+  def loop(crt: Int, acc: Matrix): Matrix = 
+  {
+    if(crt > steps) acc
+    else loop(crt+1, gradientDescentStep(acc, Y, parameters))
+  }
+
+  (loop(0, matWithOnes), rootMeanSquareError(mat, Y, parameters))
+}
+object Helpers {
+  def zipWith[A, B, C](op: (A, B) => C)(l1: List[A], l2: List[B]): List[C] = {
+    assert(l1.size == l2.size)
+
+    l1.zip(l2).map { case (x, y) =>
+      op(x, y)
+    }
+  }
+}
+linearRegression(steps, Matrix(List(List(0.0, 0.0)).transpose), List("GrLivArea", "SalePrice"))
+
+Helpers.zipWith((a: Int, b: Int) => a + b)(List(1, 2, 3), List(2, 3, 4))
 
 val test_ds = Dataset("datasets/tinyds.csv")
 // Tolerance for result and sum of errors

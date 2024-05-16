@@ -1,5 +1,5 @@
 import scala.compiletime.ops.int
-class Board(val board: List[List[Player]], val player: Player) {
+case class Board(val board: List[List[Player]], val player: Player) {
 
   type Line = List[Player]
 
@@ -431,11 +431,11 @@ assert(Board(medium1).getSndDiag == List(Two, Two, Two, Two, Two))
 Board(medium1).getAboveFstDiag
 Board(aboveFstDiag1).toString()
 
-//This is wrong as well!
+// //This is wrong as well!
 // assert(Board(medium1).getAboveFstDiag == Board(aboveFstDiag1))
 // assert(Board(medium2).getAboveFstDiag == Board(aboveFstDiag2))
 
-//This will never be true!
+// // This will never be true!
 // assert(Board(medium1).getBelowFstDiag == Board(aboveFstDiag1))
 // assert(Board(medium2).getBelowFstDiag == Board(aboveFstDiag2))
 
