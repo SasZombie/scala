@@ -101,8 +101,8 @@ object Matrix {
   def apply(dataset: Dataset): Matrix = new Matrix(
     Option(
       dataset.data.map { (inner) =>
-        inner.map { 
-          case x => x.toDouble
+        inner.map { case x =>
+          x.toDouble
         }.toList
       }.toList
     )
@@ -203,25 +203,23 @@ def gradientDescentStep(X: Matrix, Y: Matrix, parameters: Matrix): Matrix = {
   Matrix(combined)
 }
 
-def linearRegression(steps: Int, parameters: Matrix, features: List[String]): (Matrix, Option[Double]) = 
-{
-  val dataSet = Dataset("datasets/tinyds.csv")
-  val data = dataSet.selectColumns(features)
+def linearRegression(steps: Int, parameters: Matrix, features: List[String]): (Matrix, Option[Double]) = {
+  val dataSet   = Dataset("datasets/tinyds.csv")
+  val data      = dataSet.selectColumns(features)
   val trainTest = data.split(80)
-  val train = trainTest._1
-  val test = trainTest._2
+  val train     = trainTest._1
+  val test      = trainTest._2
 
   print(train)
   val mat = Matrix(train.getRows.toString())
-  
+
   val matWithOnes = mat ++ 1
-  val lastRow = mat.m.get.map(_.last)
-  val Y = Matrix(List(lastRow))
-  
-  def loop(crt: Int, acc: Matrix): Matrix = 
-  {
-    if(crt > steps) acc
-    else loop(crt+1, gradientDescentStep(acc, Y, parameters))
+  val lastRow     = mat.m.get.map(_.last)
+  val Y           = Matrix(List(lastRow))
+
+  def loop(crt: Int, acc: Matrix): Matrix = {
+    if (crt > steps) acc
+    else loop(crt + 1, gradientDescentStep(acc, Y, parameters))
   }
 
   (loop(0, matWithOnes), rootMeanSquareError(mat, Y, parameters))

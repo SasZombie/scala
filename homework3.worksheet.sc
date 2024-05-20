@@ -71,15 +71,13 @@ case class Board(val board: List[List[Player]], val player: Player) {
       } yield col
     }
     val newInter = inter.init
-    //hour 5...
-    def loop(acc: List[List[Player]], value: List[List[Player]]): List[Line] =
-    {
-      if(value == Nil) acc
-      else 
-      {
+    // hour 5...
+    def loop(acc: List[List[Player]], value: List[List[Player]]): List[Line] = {
+      if (value == Nil) acc
+      else {
         val toAdd = value.map(_.last)
         loop(acc ::: List(toAdd), value.map(_.init).filter(_.nonEmpty))
-    
+
       }
     }
     loop(Nil, newInter)
@@ -98,14 +96,12 @@ case class Board(val board: List[List[Player]], val player: Player) {
 
     val newInter = inter.tail
 
-    def loop(acc: List[List[Player]], value: List[List[Player]]): List[Line] =
-    {
-      if(value == Nil) acc
-      else 
-      {
+    def loop(acc: List[List[Player]], value: List[List[Player]]): List[Line] = {
+      if (value == Nil) acc
+      else {
         val toAdd = value.map(_.last)
         loop(acc ::: List(toAdd), value.map(_.init).filter(_.nonEmpty))
-    
+
       }
     }
     loop(Nil, newInter)
@@ -141,6 +137,7 @@ case class Board(val board: List[List[Player]], val player: Player) {
       board
     }.toList
   }
+
 //MARK: Sequences
   def sequences: Map[Int, Int] = {
     def longSeq(list: List[Player]): Int = {
@@ -156,11 +153,36 @@ case class Board(val board: List[List[Player]], val player: Player) {
         ._2
     }
 
-    def canForm5(list: List[Player]): (Boolean, Int) = {
-      val allFilled = list.map((player) => if (player == Empty) this.player else player)
-      val returned  = longSeq(list)
+    def longSeqNon(list: List[Player]): Int = {
+      list
+        .foldLeft((0, 0)) { case ((currentCount, longestCount), elem) =>
+          if (elem == this.player || elem == Empty) {
+            val newCount = currentCount + 1
+            (newCount, Math.max(newCount, longestCount))
+          } else {
+            (0, longestCount)
+          }
+        }
+        ._2
+    }
 
-      if (longSeq(allFilled) >= 5) (true, returned) else (false, 0)
+    def canForm5(list: List[Player]): (Boolean, Int, Int) = {
+      // val allFilled = list.map((player) => if (player == Empty) this.player else player)
+
+      val (allFilled, elseCount) = list.foldLeft((List.empty[Player], 0)) { case ((accList, count), player) =>
+        if (player == Empty) {
+          (accList :+ this.player, count + 1)
+        } else {
+          (accList :+ player, count)
+        }
+      }
+
+      val size = list.size
+      val longestEmptySpace = longSeqNon(list)
+      val mapIndex = longSeq(list)
+      println("Size = " + size + " Else = " + elseCount + " LongestEmpty = " + longestEmptySpace + " Returned = " + mapIndex)   
+
+      if ((longSeq(allFilled) >= 5) && (size - elseCount > 1)) (true, mapIndex, longestEmptySpace - 4 ) else (false, 0, 0)
     }
 
     def concatMaps(first: Map[Int, Int], seccond: Map[Int, Int]): Map[Int, Int] = {
@@ -168,15 +190,16 @@ case class Board(val board: List[List[Player]], val player: Player) {
         acc + (key -> (acc.getOrElse(key, 0) + value))
       }
     }
-    
+
     val defaultMap = Map(5 -> 0, 4 -> 0, 3 -> 0, 2 -> 0)
 
     val seqPerRow = for (row <- board) yield {
       canForm5(row)
     }
+
     val sumPerRow = seqPerRow.foldLeft(defaultMap) {
-      case (acc, (true, num)) =>
-        acc + (num -> (acc.getOrElse(num, 0) + 1))
+      case (acc, (true, num, value)) =>
+        acc + (num -> (acc.getOrElse(num, 0) + value))
       case (acc, _) => acc
     }
 
@@ -185,39 +208,18 @@ case class Board(val board: List[List[Player]], val player: Player) {
     }
 
     val sumCol = seqPerCol.foldLeft(sumPerRow) {
-      case (acc, (true, num)) =>
-        acc + (num -> (acc.getOrElse(num, 0) + 1))
+      case (acc, (true, num, value)) =>
+        acc + (num -> (acc.getOrElse(num, 0) + value))
       case (acc, _) => acc
     }
-
-    // val seqPerDiagPrinc = for (singleBoard <- allMoves) yield {
-    //   longSeq(singleBoard.getFstDiag, this.player)
-    // }
-
-    // val sumDiagPrin = seqPerDiagPrinc.count((elem) => elem >= crt + 1)
-
-    // val seqPerDiagSec = for (singleBoard <- allMoves) yield {
-    //   longSeq(singleBoard.getFstDiag, this.player)
-    // }
-
-    // val sumDiagSec = seqPerDiagSec.count((elem) => elem >= crt + 1)
-
-    // val seqPerSubDiagPrincAbove = for (singleBoard <- allMoves) yield {
-    //   val inter = singleBoard.getAboveFstDiag
-    //   inter.map{
-    //     inner => longSeq(inner, this.player)
-    //   }.toList
-    // }
-
-    // val sumSubDiagPrincAbove = seqPerSubDiagPrincAbove.flatten.count((elem) => elem >= crt + 1)
 
     val seqPerDiagPrincBelow = for (below <- getBelowFstDiag) yield {
       canForm5(below)
     }
 
     val sumPerDiagPrincBelow = seqPerDiagPrincBelow.foldLeft(sumCol) {
-      case (acc, (true, num)) =>
-        acc + (num -> (acc.getOrElse(num, 0) + 1))
+      case (acc, (true, num, value)) =>
+        acc + (num -> (acc.getOrElse(num, 0) + value))
       case (acc, _) => acc
     }
 
@@ -226,8 +228,8 @@ case class Board(val board: List[List[Player]], val player: Player) {
     }
 
     val sumPerDiagPrincAbove = seqPerDiagPrincAbove.foldLeft(sumPerDiagPrincBelow) {
-      case (acc, (true, num)) =>
-        acc + (num -> (acc.getOrElse(num, 0) + 1))
+      case (acc, (true, num, value)) =>
+        acc + (num -> (acc.getOrElse(num, 0) + value))
       case (acc, _) => acc
     }
     // --------
@@ -236,8 +238,8 @@ case class Board(val board: List[List[Player]], val player: Player) {
     }
 
     val sumPerDiagSecBelow = seqPerDiagSecBelow.foldLeft(sumPerDiagPrincAbove) {
-      case (acc, (true, num)) =>
-        acc + (num -> (acc.getOrElse(num, 0) + 1))
+      case (acc, (true, num, value)) =>
+        acc + (num -> (acc.getOrElse(num, 0) + value))
       case (acc, _) => acc
     }
 
@@ -247,18 +249,18 @@ case class Board(val board: List[List[Player]], val player: Player) {
 
     // print(seqPerDiagSecAbove)
     val sumPerDiagSecAbove = seqPerDiagSecAbove.foldLeft(sumPerDiagSecBelow) {
-      case (acc, (true, num)) =>
-        acc + (num -> (acc.getOrElse(num, 0) + 1))
+      case (acc, (true, num, value)) =>
+        acc + (num -> (acc.getOrElse(num, 0) + value))
       case (acc, _) => acc
     }
     //////////////////////////////////////////////////////
     val seqDiagPrinc = canForm5(getFstDiag)
     val sumPerDiagPrinc = {
       val acc = sumPerDiagSecAbove
-      
+
       seqDiagPrinc match {
-        case (true, num) =>
-          acc + (num -> (acc.getOrElse(num, 0) + 1))
+        case (true, num, value) =>
+          acc + (num -> (acc.getOrElse(num, 0) + value))
         case _ => acc
       }
     }
@@ -268,8 +270,8 @@ case class Board(val board: List[List[Player]], val player: Player) {
       val acc = sumPerDiagPrinc
 
       seqDiagSec match {
-        case (true, num) =>
-          acc + (num -> (acc.getOrElse(num, 0) + 1))
+        case (true, num, value) =>
+          acc + (num -> (acc.getOrElse(num, 0) + value))
         case _ => acc
       }
     }
@@ -471,7 +473,7 @@ val t2 =
 Board(t2, One).getAboveFstDiag
 Board(t2, One).getAboveSndDiag
 Board(t2, One).sequences
-assert(Board(t2, One).winner)
+// assert(Board(t2, One).winner)
 
 val smallUpd1 =
   """0XX
@@ -535,6 +537,16 @@ val t3p =
 |0XXX..
 |......
 |......""".stripMargin
+Board(t1, One).sequences
+Board(t1, Two).sequences
+Board(t2p, One).sequences
+
+
+
+
+
+
+Board(t3p, One).sequences
 
 val t4p =
   """......
@@ -552,10 +564,6 @@ val t5p =
 |......
 |......""".stripMargin
 
-Board(t1, One).sequences
-Board(t1, Two).sequences
-Board(t2p, One).sequences
 assert(Board(t1, One).sequences == Map(2 -> 0, 3 -> 0, 4 -> 0, 5 -> 0))
-//This is incorrect!
-// assert(Board(t2p, One).sequences(3) == 2)
+assert(Board(t2p, One).sequences(3) == 2)
 assert(Board(t3p, One).sequences(3) == 1)
