@@ -418,8 +418,7 @@ mewo.player == mewo2.player
 mewo == mewo2
 
 //This asset is impossible!!!
-// assert(Board(medium1).getColumns == Board(medium1))
-//assert(getColumns(makeBoard(medium1)) == makeBoard(medium1))
+assert(Board(medium1).getColumns == Board(medium1))
 
 assert(Board(medium1).getFstDiag == List(Two, Two, Two, Two, Two))
 
@@ -434,26 +433,26 @@ Board(medium1).getAboveFstDiag
 Board(aboveFstDiag1).toString()
 
 // //This is wrong as well!
-// assert(Board(medium1).getAboveFstDiag == Board(aboveFstDiag1))
-// assert(Board(medium2).getAboveFstDiag == Board(aboveFstDiag2))
+assert(Board(medium1).getAboveFstDiag == Board(aboveFstDiag1).board)
+assert(Board(medium2).getAboveFstDiag == Board(aboveFstDiag2).board)
 
 // // This will never be true!
-// assert(Board(medium1).getBelowFstDiag == Board(aboveFstDiag1))
-// assert(Board(medium2).getBelowFstDiag == Board(aboveFstDiag2))
+// assert(Board(medium1).getBelowFstDiag == Board(aboveFstDiag1).board)
+// assert(Board(medium2).getBelowFstDiag == Board(aboveFstDiag2).board)
 
 Board(medium1).getAboveSndDiag
 Board(medium2).getAboveSndDiag
 //This will never be true!!
-// assert(Board(medium1).getAboveSndDiag == Board(aboveSndDiag1))
-// assert(Board(medium2).getAboveSndDiag == Board(aboveSndDiag1))
+assert(Board(medium1).getAboveSndDiag == Board(aboveSndDiag1).board)
+// assert(Board(medium2).getAboveSndDiag == Board(aboveSndDiag1).board)
 
 Board(medium1).getBelowSndDiag
 Board(medium2).getBelowSndDiag
 //This will never be true!!
-// assert(Board(medium1).getBelowSndDiag == Board(belowSndDiag1))
-// assert(Board(medium2).getBelowSndDiag == Board(belowSndDiag2))
-// Board(medium1, Two).winner
-// Board(medium1, One).winner
+// assert(Board(medium1).getBelowSndDiag == Board(belowSndDiag1).board)
+// assert(Board(medium2).getBelowSndDiag == Board(belowSndDiag2).board)
+Board(medium1, Two).winner
+Board(medium1, One).winner
 Board(medium1, Two).sequences
 
 assert(Board(medium1, Two).winner)
@@ -473,7 +472,7 @@ val t2 =
 Board(t2, One).getAboveFstDiag
 Board(t2, One).getAboveSndDiag
 Board(t2, One).sequences
-// assert(Board(t2, One).winner)
+assert(Board(t2, One).winner)
 
 val smallUpd1 =
   """0XX
